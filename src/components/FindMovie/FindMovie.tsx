@@ -89,7 +89,7 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
           </div>
           {error.length > 0 && (
             <p className="help is-danger" data-cy="errorMessage">
-              Can&apos;t find a movie with such a title
+              {error}
             </p>
           )}
         </div>
