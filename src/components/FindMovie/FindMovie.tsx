@@ -31,12 +31,14 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
 
+    const searchRow = query.trim().split(' ').join('+');
+
     setIsLoading(true);
-    getMovie(query)
+    getMovie(searchRow)
       .then(data => {
         if (!isError<MovieData>(data)) {
           const poster =
-            data.Poster === 'N/A'
+            !data.Poster || data.Poster === 'N/A'
               ? 'https://via.placeholder.com/360x270.png?text=no%20preview'
               : data.Poster;
 
