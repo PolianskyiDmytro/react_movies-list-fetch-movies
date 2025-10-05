@@ -3,8 +3,6 @@ import './FindMovie.scss';
 import { MovieCard } from '../MovieCard';
 import { Movie } from '../../types/Movie';
 import { getMovie } from '../../api';
-import { ResponseError } from '../../types/ReponseError';
-import { MovieData } from '../../types/MovieData';
 import classNames from 'classnames';
 
 type Props = {
@@ -12,20 +10,15 @@ type Props = {
 };
 
 export const FindMovie: React.FC<Props> = ({ onAdd }) => {
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState('');
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  function isError<T extends object>(
-    data: T | ResponseError,
-  ): data is ResponseError {
-    return Object.hasOwn(data, 'Error');
-  }
+  const [error, setError] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
-    setError('');
+    setIsError(false);
   };
 
   const handleSearch = (event: React.FormEvent) => {
@@ -36,7 +29,7 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
     setIsLoading(true);
     getMovie(searchRow)
       .then(data => {
-        if (!isError<MovieData>(data)) {
+        if ('imdbID' in data) {
           const poster =
             !data.Poster || data.Poster === 'N/A'
               ? 'https://via.placeholder.com/360x270.png?text=no%20preview'
@@ -53,7 +46,8 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
           setMovie(selectedInfo);
         }
 
-        if (isError<MovieData>(data)) {
+        if ('Error' in data) {
+          setIsError(true);
           setError(data.Error);
         }
       })
@@ -82,12 +76,12 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
               type="text"
               id="movie-title"
               placeholder="Enter a title to search"
-              className={classNames('input', { 'is-danger': error.length > 0 })}
+              className={classNames('input', { 'is-danger': isError })}
               value={query}
               onChange={event => handleQueryChange(event)}
             />
           </div>
-          {error.length > 0 && (
+          {isError && (
             <p className="help is-danger" data-cy="errorMessage">
               {error}
             </p>
@@ -101,7 +95,7 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
               className={classNames('button is-light', {
                 'is-loading': isLoading,
               })}
-              disabled={query.length === 0 && true}
+              disabled={!query && true}
             >
               {movie ? 'Search again' : 'Find a movie'}
             </button>
