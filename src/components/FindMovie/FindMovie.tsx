@@ -29,7 +29,10 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
     setIsLoading(true);
     getMovie(searchRow)
       .then(data => {
-        if ('imdbID' in data) {
+        if ('Error' in data) {
+          setIsError(true);
+          setError(data.Error);
+        } else {
           const poster =
             !data.Poster || data.Poster === 'N/A'
               ? 'https://via.placeholder.com/360x270.png?text=no%20preview'
@@ -44,11 +47,6 @@ export const FindMovie: React.FC<Props> = ({ onAdd }) => {
           };
 
           setMovie(selectedInfo);
-        }
-
-        if ('Error' in data) {
-          setIsError(true);
-          setError(data.Error);
         }
       })
       .finally(() => {
